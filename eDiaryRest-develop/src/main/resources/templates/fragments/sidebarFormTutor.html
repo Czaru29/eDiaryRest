@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/apple-icon.png}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>
+        E-dziennik
+    </title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport">
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <!-- CSS Files -->
+    <link th:href="@{/css/material-dashboard.css}" rel="stylesheet">
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link th:href="@{/demo/demo.css}" rel="stylesheet">
+</head>
+<body>
+
+<div th:fragment="sidebar(activeTab)" class="sidebar" data-color="purple" data-background-color="white">
+
+    <div class="logo"><a href="#" class="simple-text logo-normal">
+        E-dziennik
+    </a></div>
+    <div class="sidebar-wrapper">
+        <ul class="nav">
+
+            <span th:replace="fragments/sidebarUser :: userNav"></span>
+
+
+            <li class="nav-item " sec:authorize="hasRole('FORM_TUTOR')"
+                th:classappend="${activeTab == 'studentCard' ? 'active':''}">
+            <a class="nav-link" th:href="@{'/teacher/'+ ${teacher.id} + '/formTutor/studentCard'}">
+                    <i class="material-icons">contact_page</i>
+                    <p>Karta ucznia</p>
+                </a>
+            </li>
+            <li class="nav-item " sec:authorize="hasRole('FORM_TUTOR')"
+                th:classappend="${activeTab == 'studentCouncil' ? 'active':''}">
+            <a class="nav-link" th:href="@{'/teacher/'+ ${teacher.id} + '/formTutor/studentCouncil'}">
+                    <i class="material-icons">groups</i>
+                    <p>Trójka klasowa</p>
+                </a>
+            </li>
+            <li class="nav-item " sec:authorize="hasRole('FORM_TUTOR')"
+                th:classappend="${activeTab == 'parentCouncil' ? 'active':''}">
+            <a class="nav-link" th:href="@{'/teacher/'+ ${teacher.id} + '/formTutor/parentCouncil'}">
+                    <i class="material-icons">people_outline</i>
+                    <p>Rada rodziców</p>
+                </a>
+            </li>
+            <li class="nav-item " sec:authorize="hasRole('FORM_TUTOR')"
+                th:classappend="${activeTab == 'behaviors' ? 'active':''}">
+            <a class="nav-link" th:href="@{'/teacher/'+ ${teacher.id} + '/formTutor/behaviorGrade'}">
+                    <i class="material-icons">rate_review</i>
+                    <p style="text-transform: none">Oceny z zachowania</p>
+                </a>
+            </li>
+
+
+
+            <span th:replace="fragments/sidebarUser :: userRoleNav('FORM_TUTOR')"></span>
+
+        </ul>
+    </div>
+</div>
+
+
+</body>
+</html>

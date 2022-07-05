@@ -1,0 +1,685 @@
+<!--
+=========================================================
+Material Dashboard - v2.1.2
+=========================================================
+
+Product Page: https://www.creative-tim.com/product/material-dashboard
+Copyright 2020 Creative Tim (https://www.creative-tim.com)
+Coded by Creative Tim
+
+=========================================================
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/apple-icon.png}">
+  <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <title>
+    E-dziennik
+  </title>
+  <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+  <!--     Fonts and icons     -->
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+  <!-- CSS Files -->
+  <link th:href="@{/css/material-dashboard.css}" rel="stylesheet" />
+  <!-- CSS Just for demo purpose, don't include it in your project -->
+  <link th:href="@{/demo/demo.css}" rel="stylesheet" />
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+</head>
+
+<body class="">
+<div class="wrapper ">
+
+  <div th:replace="fragments/sidebarAdmin :: sidebar('users')"></div>
+
+
+  <div class="main-panel">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+      <div class="container-fluid">
+        <div class="navbar-wrapper">
+          <a class="navbar-brand" th:href="@{'/admin/users'}">Konta</a>
+          <a th:text="'>'"></a>
+          <a class="navbar-brand" th:href="@{'/admin/users/' + ${editUser.id} + '/edit'}">Edytuj użytkownika</a>
+
+        </div>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+        </button>
+        <div th:replace="fragments/optionsBar :: optionsBar"> </div>
+      </div>
+    </nav>
+    <!-- End Navbar -->
+    <div class="content">
+      <div class="container-fluid">
+        <div class="row justify-content-md-center">
+
+          <div class="col-lg-10 col-md-10 col-sm-12">
+
+            <div class="card">
+              <div class="card-header card-header-primary">
+                <h4 class="card-title">Edytuj użytkownika</h4>
+              </div>
+              <div class="card-body">
+                  <form th:object="${editUser}" th:action="@{'/admin/users/' + ${editUser.id} + '/update'}" method="post">
+              </div>
+              <div class="card-body">
+
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">person</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Imię i nazwisko</label>
+                    <input type="text" class="form-control" th:field="*{editUser.name}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.Name')}">
+                      <ul>
+                        <li th:each="err : ${#fields.errors('editUser.Name')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">login</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Nazwa użytkownika</label>
+                    <input type="text" class="form-control" th:field="*{editUser.username}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.username')}">
+                      <ul>
+                          <li th:each="err : ${#fields.errors('editUser.username')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">vpn_key</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Hasło</label>
+                    <input  id="passwd" type="password" class="form-control" th:field="*{editUser.password}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.password')}">
+                      <ul>
+                          <li th:each="err : ${#fields.errors('editUser.password')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                    <button id="editPasswd" type="button" class="btn btn-primary pull-right">Odblokuj</button>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">groups</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label>Rola</label>
+                    <div class="form-group">
+                      <div class="form-check">
+                        <button th:each="role : ${editUser.roles}" type="button" class="btn btn-outline-primary btn-sm">
+                          <span th:switch="${role.name}">
+                            <div th:case="'ROLE_ADMIN'" >
+                              <a data-toggle="modal" class="open-gradeDialogModal open-gradeDialogModal-deleteRole" href="#deleteRoleModal"
+                                 th:attr="data-id=''+${editUser.id}+'', data-target='#deleteRoleModal', data-role=''+${role.name}+''">
+                                ADMINISTRATOR
+                                <i class="material-icons icon-warning">delete_forever</i>
+                              </a>
+                            </div>
+                            <div th:case="'ROLE_STUDENT'" >
+                              <a data-toggle="modal" class="open-gradeDialogModal open-gradeDialogModal-deleteRole" href="#deleteRoleModal"
+                                 th:attr="data-id=''+${editUser.id}+'', data-target='#deleteRoleModal', data-role=''+${role.name}+''">
+                                UCZEŃ
+                                <i class="material-icons icon-warning">delete_forever</i>
+                              </a>
+                            </div>
+                            <div th:case="'ROLE_PARENT'" >
+                              <a data-toggle="modal" class="open-gradeDialogModal open-gradeDialogModal-deleteRole" href="#deleteRoleModal"
+                                 th:attr="data-id=''+${editUser.id}+'', data-target='#deleteRoleModal', data-role=''+${role.name}+''">
+                                RODZIC
+                                <i class="material-icons icon-warning">delete_forever</i>
+                              </a>
+                            </div>
+                            <div th:case="'ROLE_TEACHER'">
+                              <a data-toggle="modal" class="open-gradeDialogModal open-gradeDialogModal-deleteRole" href="#deleteRoleModal"
+                                 th:attr="data-id=''+${editUser.id}+'', data-target='#deleteRoleModal', data-role=''+${role.name}+''">
+                              NAUCZYCIEL
+                                <i class="material-icons icon-warning">delete_forever</i>
+                              </a>
+                            </div>
+                            <div th:case="'ROLE_FORM_TUTOR'">
+                              <a data-toggle="modal" class="open-gradeDialogModal open-gradeDialogModal-deleteRole" href="#deleteRoleModal"
+                                 th:attr="data-id=''+${editUser.id}+'', data-target='#deleteRoleModal', data-role=''+${role.name}+''">
+                                WYCHOWAWCA
+                              </a>
+                            </div>
+                            <div th:case="'ROLE_DEPUTY_HEAD'" >
+                              <a data-toggle="modal" class="open-gradeDialogModal open-gradeDialogModal-deleteRole" href="#deleteRoleModal"
+                                 th:attr="data-id=''+${editUser.id}+'', data-target='#deleteRoleModal', data-role=''+${role.name}+''">
+                              WICEDYREKTOR
+                                <i class="material-icons icon-warning">delete_forever</i>
+                              </a>
+                            </div>
+                            <div th:case="'ROLE_HEADMASTER'">
+                              <a data-toggle="modal" class="open-gradeDialogModal open-gradeDialogModal-deleteRole" href="#deleteRoleModal"
+                                 th:attr="data-id=''+${editUser.id}+'', data-target='#deleteRoleModal', data-role=''+${role.name}+''">
+                              DYREKTOR
+                                <i class="material-icons icon-warning">delete_forever</i>
+                              </a>
+                            </div>
+                          </span>
+                        </button>
+                      </div>
+                      <div class="form-check" th:each="role : ${roles}">
+                          <label class="form-check-label" th:if="!${#lists.contains(ownedRoles, role.name)} and ${role.name} != 'ROLE_FORM_TUTOR'" th:switch="${role.name}">
+                            <input th:id="'checkbox_' + ${role.name}" class="form-check-input" type="checkbox"  name="selectedRoles" th:value="${role.id}">
+                            <div th:case="'ROLE_ADMIN'" >ADMINISTRATOR</div>
+                            <div th:case="'ROLE_STUDENT'" >UCZEŃ</div>
+                            <div th:case="'ROLE_PARENT'" >RODZIC</div>
+                            <div th:case="'ROLE_TEACHER'">NAUCZYCIEL</div>
+                            <div th:case="'ROLE_DEPUTY_HEAD'" >WICEDYREKTOR</div>
+                            <div th:case="'ROLE_HEADMASTER'">DYREKTOR</div>
+                            <span class="form-check-sign">
+                              <span class="check"></span>
+                            </span>
+                          </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="addStudent" class="row">
+                <div class="col-md-1">
+                <span class="input-group-text">
+                    <i class="material-icons">family_restroom</i>
+                </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="label">Przypisz uczniów do rodzica</label>
+                    <br>
+                    <select id="selectStudents" class="selectpicker" data-live-search="true" multiple>
+                      <option th:each="student : ${students}"
+                              th:value="${student.id}"
+                              th:text="${student.userName}">
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div style="display: none">
+                  <span th:each="student : ${students}">
+                    <input th:id="'chkStudent_' + ${student.id}" type="checkbox"  name="selectedStudents" th:value="${student.id}">
+                  </span>
+                </div>
+              </div>
+
+                <div class="row">
+                  <div class="col-md-1"></div>
+                  <div class="col-md-12">
+                <span id="noRolesError" class="text-danger">
+                  <p>Wybierz rolę</p>
+                </span>
+                    </br></div>
+                </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="card-header card-header-primary">
+                    <h4 class="card-title">Adres</h4>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row"><div class="col-md-12"></br></div></div>
+
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">edit_road</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Ulica</label>
+                    <input type="text" class="form-control" id="street" name="address.street" th:value="*{editUser?.address?.street}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.address.street')}">
+                      <ul>
+                          <li th:each="err : ${#fields.errors('editUser.address.street')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              </br>
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">location_city</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Miasto</label>
+                    <input type="text" class="form-control" id="city" name="address.city" th:value="*{editUser?.address?.city}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.address.city')}">
+                      <ul>
+                          <li th:each="err : ${#fields.errors('editUser.address.city')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              </br>
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">streetview</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Województwo</label>
+                    <input type="text" class="form-control" id="state" name="address.state" th:value="*{editUser?.address?.state}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.address.state')}">
+                      <ul>
+                          <li th:each="err : ${#fields.errors('editUser.address.state')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              </br>
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">contact_mail</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Kod pocztowy</label>
+                    <input type="text" class="form-control" id="zip" name="address.zip" th:value="*{editUser?.address?.zip}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.address.zip')}">
+                      <ul>
+                          <li th:each="err : ${#fields.errors('editUser.address.zip')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              </br>
+              <div class="row">
+                <div class="col-md-1">
+                  <span class="input-group-text">
+                      <i class="material-icons">phone</i>
+                  </span>
+                </div>
+                <div class="col-md-11">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Numer telefonu</label>
+                    <input type="tel" class="form-control" id="phoneNumber" name="address.phoneNumber" th:value="*{editUser?.address?.phoneNumber}">
+                    <span class="text-danger" th:if="${#fields.hasErrors('editUser.address.phoneNumber')}">
+                      <ul>
+                          <li th:each="err : ${#fields.errors('editUser.address.phoneNumber')}" th:text="${err}"/>
+                      </ul>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button id="submitButton"type="submit" class="btn btn-primary pull-right">Zapisz</button>
+              <div class="clearfix"></div>
+              </form>
+
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-profile"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+  </footer>
+</div>
+
+<!--  Delete role-->
+  <div class="modal fade" id="deleteRoleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel"><i class="material-icons">delete</i></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Usunąć rolę?
+        </div>
+        <div class="modal-footer">
+          <form id="deleteFormRole" method="post">
+            <input id="roleToDelete" type="hidden" name="roleToDelete"/>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Nie</button>
+            <button type="submit" class="btn btn-danger" >Usuń</button>
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <input id="rolesCount" type="hidden"  th:value="${ownedRoles.size()}"/>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<!--   Core JS Files   -->
+<script th:src="@{/js/core/jquery.min.js}"></script>
+<script th:src="@{/js/core/popper.min.js}"></script>
+<script th:src="@{/js/core/bootstrap-material-design.min.js}"></script>
+<script th:src="@{/js/plugins/perfect-scrollbar.jquery.min.js}"></script>
+<!-- Plugin for the momentJs  -->
+<script th:src="@{/js/plugins/moment.min.js}"></script>
+<!--  Plugin for Sweet Alert -->
+<script th:src="@{/js/plugins/sweetalert2.js}"></script>
+<!-- Forms Validations Plugin -->
+<script th:src="@{/js/plugins/jquery.validate.min.js}"></script>
+<!-- Plugin for the Wizard, full documentation here: https://github.com/VinceG/twitter-bootstrap-wizard -->
+<script th:src="@{/js/plugins/jquery.bootstrap-wizard.js}"></script>
+<!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+<script th:src="@{/js/plugins/bootstrap-selectpicker.js}"></script>
+<!--  Plugin for the DateTimePicker, full documentation here: https://eonasdan.github.io/bootstrap-datetimepicker/ -->
+<script th:src="@{/js/plugins/bootstrap-datetimepicker.min.js}"></script>
+<!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->
+<script th:src="@{/js/plugins/jquery.dataTables.min.js}"></script>
+<!--	Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
+<script th:src="@{/js/plugins/bootstrap-tagsinput.js}"></script>
+<!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+<script th:src="@{/js/plugins/jasny-bootstrap.min.js}"></script>
+<!--  Full Calendar Plugin, full documentation here: https://github.com/fullcalendar/fullcalendar    -->
+<script th:src="@{/js/plugins/fullcalendar.min.js}"></script>
+<!-- Vector Map plugin, full documentation here: http://jvectormap.com/documentation/ -->
+<script th:src="@{/js/plugins/jquery-jvectormap.js}"></script>
+<!--  Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
+<script th:src="@{/js/plugins/nouislider.min.js}"></script>
+<!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
+<!-- Library for adding dinamically elements -->
+<script th:src="@{/js/plugins/arrive.min.js}"></script>
+<!--  Google Maps Plugin    -->
+<!-- Chartist JS -->
+<script th:src="@{/js/plugins/chartist.min.js}"></script>
+<!--  Notifications Plugin    -->
+<script th:src="@{/js/plugins/bootstrap-notify.js}"></script>
+<!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
+<script th:src="@{/js/material-dashboard.js?v=2.1.2}" type="text/javascript"></script>
+<!-- Material Dashboard DEMO methods, don't include it in your project! -->
+<script th:src="@{/demo/demo.js}"></script>
+<script>
+  $(document).ready(function() {
+    $().ready(function() {
+      $sidebar = $('.sidebar');
+
+      $sidebar_img_container = $sidebar.find('.sidebar-background');
+
+      $full_page = $('.full-page');
+
+      $sidebar_responsive = $('body > .navbar-collapse');
+
+      window_width = $(window).width();
+
+      fixed_plugin_open = $('.sidebar .sidebar-wrapper .nav li.active a p').html();
+
+      if (window_width > 767 && fixed_plugin_open == 'Dashboard') {
+        if ($('.fixed-plugin .dropdown').hasClass('show-dropdown')) {
+          $('.fixed-plugin .dropdown').addClass('open');
+        }
+
+      }
+
+      $('.fixed-plugin a').click(function(event) {
+        // Alex if we click on switch, stop propagation of the event, so the dropdown will not be hide, otherwise we set the  section active
+        if ($(this).hasClass('switch-trigger')) {
+          if (event.stopPropagation) {
+            event.stopPropagation();
+          } else if (window.event) {
+            window.event.cancelBubble = true;
+          }
+        }
+      });
+
+      $('.fixed-plugin .active-color span').click(function() {
+        $full_page_background = $('.full-page-background');
+
+        $(this).siblings().removeClass('active');
+        $(this).addClass('active');
+
+        var new_color = $(this).data('color');
+
+        if ($sidebar.length != 0) {
+          $sidebar.attr('data-color', new_color);
+        }
+
+        if ($full_page.length != 0) {
+          $full_page.attr('filter-color', new_color);
+        }
+
+        if ($sidebar_responsive.length != 0) {
+          $sidebar_responsive.attr('data-color', new_color);
+        }
+      });
+
+      $('.fixed-plugin .background-color .badge').click(function() {
+        $(this).siblings().removeClass('active');
+        $(this).addClass('active');
+
+        var new_color = $(this).data('background-color');
+
+        if ($sidebar.length != 0) {
+          $sidebar.attr('data-background-color', new_color);
+        }
+      });
+
+      $('.fixed-plugin .img-holder').click(function() {
+        $full_page_background = $('.full-page-background');
+
+        $(this).parent('li').siblings().removeClass('active');
+        $(this).parent('li').addClass('active');
+
+
+        var new_image = $(this).find("img").attr('src');
+
+        if ($sidebar_img_container.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+          $sidebar_img_container.fadeOut('fast', function() {
+            $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+            $sidebar_img_container.fadeIn('fast');
+          });
+        }
+
+        if ($full_page_background.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+          var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+          $full_page_background.fadeOut('fast', function() {
+            $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+            $full_page_background.fadeIn('fast');
+          });
+        }
+
+        if ($('.switch-sidebar-image input:checked').length == 0) {
+          var new_image = $('.fixed-plugin li.active .img-holder').find("img").attr('src');
+          var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+          $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+          $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+        }
+
+        if ($sidebar_responsive.length != 0) {
+          $sidebar_responsive.css('background-image', 'url("' + new_image + '")');
+        }
+      });
+
+      $('.switch-sidebar-image input').change(function() {
+        $full_page_background = $('.full-page-background');
+
+        $input = $(this);
+
+        if ($input.is(':checked')) {
+          if ($sidebar_img_container.length != 0) {
+            $sidebar_img_container.fadeIn('fast');
+            $sidebar.attr('data-image', '#');
+          }
+
+          if ($full_page_background.length != 0) {
+            $full_page_background.fadeIn('fast');
+            $full_page.attr('data-image', '#');
+          }
+
+          background_image = true;
+        } else {
+          if ($sidebar_img_container.length != 0) {
+            $sidebar.removeAttr('data-image');
+            $sidebar_img_container.fadeOut('fast');
+          }
+
+          if ($full_page_background.length != 0) {
+            $full_page.removeAttr('data-image', '#');
+            $full_page_background.fadeOut('fast');
+          }
+
+          background_image = false;
+        }
+      });
+
+      $('.switch-sidebar-mini input').change(function() {
+        $body = $('body');
+
+        $input = $(this);
+
+        if (md.misc.sidebar_mini_active == true) {
+          $('body').removeClass('sidebar-mini');
+          md.misc.sidebar_mini_active = false;
+
+          $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar();
+
+        } else {
+
+          $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar('destroy');
+
+          setTimeout(function() {
+            $('body').addClass('sidebar-mini');
+
+            md.misc.sidebar_mini_active = true;
+          }, 300);
+        }
+
+        // we simulate the window Resize so the charts will get updated in realtime.
+        var simulateWindowResize = setInterval(function() {
+          window.dispatchEvent(new Event('resize'));
+        }, 180);
+
+        // we stop the simulation of Window Resize after the animations are completed
+        setTimeout(function() {
+          clearInterval(simulateWindowResize);
+        }, 1000);
+
+      });
+    });
+  });
+</script>
+
+<script>
+  $(document).ready(function() {
+    $('#addStudent').hide();
+    $('#noRolesError').hide();
+    $("#passwd").prop('disabled', true);
+  });
+</script>
+<script>
+  $(function() {
+
+    $('#selectStudents').on('change', function(){
+      var selected = $(this).find("option:selected").val();
+
+      $('#classIdInput').val(selected);
+      $('#selectStudents').selectpicker("refresh");
+    });
+
+  })
+
+  $(function () {
+    $("#checkbox_ROLE_PARENT").click(function () {
+      if ($(this).is(":checked")) {
+        $("#addStudent").show();
+      } else {
+        $("#addStudent").hide();
+      }
+    });
+  });
+
+  $( "#submitButton" ).click(function() {
+
+    if($("#rolesCount").val() == 0) {
+      var $roles = $('input[name=selectedRoles]:checked');
+
+      if($roles.length == 0) {
+        $("#noRolesError").show();
+        return false;
+      }
+    }
+
+    $( "#selectStudents option:selected" ).each(function() {
+      var chkStudent = 'chkStudent_' + $(this).val();
+      document.getElementById(chkStudent).checked = true;
+    });
+
+    $("#passwd").prop('disabled', false);
+  });
+
+  $( "#editPasswd" ).click(function() {
+    $("#passwd").prop('disabled', false);
+    $("#editPasswd").hide();
+  });
+</script>
+
+<script>
+  $(document).on("click", ".open-gradeDialogModal-deleteRole", function () {
+
+    var userId = $(this).data('id');
+    var role = $(this).data('role');
+    $("#roleToDelete").val(role);
+
+
+    var deleteFormRole = document.getElementById("deleteFormRole");
+
+    deleteFormRole.setAttribute("action", "/admin/users/" + userId + "/role/delete");
+  });
+</script>
+
+
+</body>
+
+</html>

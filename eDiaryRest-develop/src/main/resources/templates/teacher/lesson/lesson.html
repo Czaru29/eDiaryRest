@@ -1,0 +1,869 @@
+<!--
+=========================================================
+Material Dashboard - v2.1.2
+=========================================================
+
+Product Page: https://www.creative-tim.com/product/material-dashboard
+Copyright 2020 Creative Tim (https://www.creative-tim.com)
+Coded by Creative Tim
+
+=========================================================
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/apple-icon.png}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        E-dziennik
+    </title>
+    <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.14.0/jquery.validate.min.js"></script>
+    <!-- CSS Files -->
+    <link th:href="@{/css/material-dashboard.css}" rel="stylesheet" />
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link th:href="@{/demo/demo.css}" rel="stylesheet" />
+</head>
+
+<style>
+    label.error{
+        color:red;
+    }
+</style>
+
+<body class="">
+<div class="wrapper ">
+
+    <div th:replace="fragments/sidebarTeacher :: sidebar('lessons')"></div>
+
+    <div class="main-panel">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+            <div class="container-fluid">
+                <div class="navbar-wrapper">
+                    <a class="navbar-brand" th:href="@{/teacher/{teacherId}/lesson/subject(teacherId=${teacherId})}">Przedmioty</a>
+                    <a th:text="'>'"></a>
+                    <a class="navbar-brand" th:href="@{/teacher/{teacherId}/lesson/subject/{subjectId}(teacherId=${teacherId}, subjectId=${subjectId})}">Lekcje</a>
+                    <a th:text="'>'"></a>
+                    <a class="navbar-brand" th:href="@{/teacher/{teacherId}/lesson/subject/{subjectId}/{classId}/{lessonId}(teacherId=${teacherId}, subjectId=${subjectId}, classId=${classId}, lessonId=${lessonId})}" th:text="${#strings.abbreviate(lessonName, 20)}" >Wybrana lekcja</a>
+                </div>
+                <a data-toggle="modal" class="open-gradeDialogModalLessonDelete" href="#deleteLessonModal"
+                   th:attr="data-lesson=''+${lessonId}+'', data-teacher=''+${teacherId}+'',data-subject=''+${subjectId}+'',
+                        data-class=''+${classId}+'', data-target='#deleteLessonModal'">
+                    <button class="submit btn  btn-link btn-lg btn-danger">
+                        <i class="material-icons">delete</i>
+                    </button>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                </button>
+                <div th:replace="fragments/optionsBar :: optionsBar"> </div>
+            </div>
+        </nav>
+        <!-- End Navbar -->
+        <div class="content">
+            <div th:if="${studentsWithGrades == null}" class="navbar-wrapper">
+                <div class="d-flex justify-content-center">
+                    <h2 class="navbar-brand">Nie znaleziono żadnych studentów</h2>
+                    <div th:if="${#fields.hasErrors()}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Holy guacamole!</strong> Coś poszło nie tak.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!--Tabs-->
+            <div class="container-fluid" th:if="${studentsWithGrades != null}">
+                    <ul class="nav  nav-pills">
+                        <li class=" nav-item" >
+                            <a class="nav-link" style="background: #9c27b0;" th:classappend="'active'" th:text="'Oceny'"  th:href="@{/teacher/{teacherId}/lesson/subject/{subjectId}/{classId}/{lessonId}(teacherId=${teacherId}, subjectId=${subjectId}, classId=${classId}, lessonId=${lessonId})}"
+                              >Home</a>
+                        </li>
+                        <li class=" nav-item">
+                            <a class="nav-link" th:text="'Frekwencja'"   th:href="@{/teacher/{teacherId}/lesson/subject/{subjectId}/{classId}/{lessonId}/attendances(teacherId=${teacherId}, subjectId=${subjectId}, classId=${classId}, lessonId=${lessonId})}"
+                                >Profile</a>
+                        </li>
+                    </ul>
+                <!--end tabs-->
+                <div class="card " >
+                    <div class="">
+                        <!-- Grades -->
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class=" text-primary">
+                                        <th class="col-lg-1">Nr. </th>
+                                        <th class="col-lg-2">Imie</th>
+                                        <th  class="text-center col-lg-9" th:colspan="${maxGrades.size() + 1}">Oceny</th>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="student : ${studentsWithGrades.keySet()}" >
+                                            <td th:text="${studentStat.index + 1}">
+                                                Nr.
+                                            </td>
+                                            <td th:text="${student?.userName}" class="border-right">
+                                                Imie
+                                            </td>
+
+                                            <td th:each="grade : ${studentsWithGrades?.get(student)}">
+                                                <a data-toggle="modal" id="open-gradeDialogModal-editGrade" class="open-gradeDialogModal btn btn-sm" href="#editGradeModal"
+                                                   th:attr="data-date=''+${grade.date}+'', data-target='#editGradeModal', data-value=''+${grade.value}+'', data-weight=''+${grade.weight}+'',
+                                                       data-student=''+${grade.studentName}+'', data-desc=''+${grade.description}+'', data-id=''+${student.id}+'', data-grade=''+${grade.id}+''"
+                                                   th:text="${grade?.value}">
+                                                </a>
+                                            </td>
+                                            <th:block th:each="field : ${maxGrades}">
+                                                <td th:if="${fieldStat.index} < ${maxGrades.size() - studentsWithGrades?.get(student).size()}" th:text="' '">
+
+                                                </td>
+                                            </th:block>
+                                            <td>
+                                                <a id="open-gradeDialogModal" data-toggle="modal" class="open-gradeDialogModal" href="#addGradeModal"
+                                                   th:attr="data-id=''+${student.id}+'', data-target='#addGradeModal', data-name=''+${student.userName}+''">
+                                                    <button class="btn btn-fab-mini btn-round">
+                                                        <i class="material-icons">add_circle</i>&nbsp;Dodaj
+                                                    </button>
+                                                </a>
+                                            </td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        <!-- end grades -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Modal add grade -->
+        <div class="modal fade" id="addGradeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Dodaj Ocene: </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <form id="addGradeForm" class=" gradeFormToValid" method="post">
+                        <div class="modal-body">
+                            <div class="content">
+                                <div class="container-fluid">
+                                    <div class="card">
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <tr>
+                                                    <td id="gradeStudent">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-floating" disabled="">Uczeń: </label>
+                                                            <input  id="studentNameVal" type="text" class="form-control" disabled>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeValue">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-floating">Ocena: </label>
+                                                            <input  id="gradeValueVal" name="gradeValueVal" type="text" class="form-control">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeWeight">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-floating">Waga</label>
+                                                            <input  id="gradeWeightVal"  name="gradeWeightVal" class="form-control" type="text"/>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeDescription">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-floating">Opis</label>
+                                                            <textarea  id="gradeDescVal" name="gradeDescVal" class="form-control" rows="3" maxlength="255"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeDate">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-floating">Data</label>
+                                                            <input  id="gradeDateValDisplay" class="form-control" type="text" th:value="${#dates.format(grade.date , 'dd-MM-yyyy HH:mm:ss')}" disabled/>
+                                                            <input type="hidden" id="gradeDateVal" th:value="${#dates.format(grade.date , 'yyyy-MM-dd HH:mm:ss')}">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <input id="studentIdVal" type="hidden"/>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Anuluj</button>
+                            <button id="sendGrade" type="button" class="btn btn-success" >Dodaj</button>
+                            <input id="csrfVal" type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        <!-- end of add grade modal -->
+
+        <!-- Modal edit grade -->
+        <div class="modal fade" id="editGradeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Ocena: </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <form id="editGradeForm"  method="post" >
+                        <div class="modal-body">
+                            <div class="content">
+                                <div class="container-fluid">
+                                    <div class="card">
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <tr>
+                                                    <td id="gradeStudentEdit">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-static " th:text="'Uczeń'" disabled> </label>
+                                                            <input  id="studentNameValEdit" type="text" class="form-control" disabled>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeValueEdit">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-static" th:text="'Ocena'"> </label>
+                                                            <input  id="gradeValueValEdit" name="gradeValueValEdit" type="text" class="form-control">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeWeightEdit">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-static" th:text="'Waga'"></label>
+                                                            <input  id="gradeWeightValEdit" name="gradeWeightValEdit" class="form-control"  type="text"/>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeDescriptionEdit">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-static" th:text="'Opis'"></label>
+                                                            <textarea  id="gradeDescValEdit" name="gradeDescValEdit" class="form-control" rows="3" maxlength="255"></textarea>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td id="gradeDateEdit">
+                                                        <div class="form-group">
+                                                            <label class="bmd-label-static" th:text="'Data'"></label>
+                                                            <input  id="gradeDateValEditDisplay" class="form-control" type="text" th:value="${#dates.format(grade.date , 'dd-MM-yyyy HH:mm:ss')}" disabled/>
+                                                            <input type="hidden" id="gradeDateValEdit" th:value="${#dates.format(grade.date , 'yyyy-MM-dd HH:mm:ss')}">
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <input id="studentIdValEdit" type="hidden"/>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Anuluj</button>
+                            <input id="gradeIdValue" type="hidden"/>
+                            <button id="deleteGrade" type="button" class="btn btn-danger ">Usuń</button>
+                            <button id="editGrade" type="button" class="btn btn-success" >Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+        <!-- end edit grade -->
+        <input id="subjectIdVal" type="hidden" th:value="${grade.subjectId}"/>
+        <input id="teacherIdVal" type="hidden" th:value="${grade.teacherId}"/>
+        <input id="lessonIdVal" type="hidden" th:value="${lessonId}"/>
+        <input id="classIdVal" type="hidden" th:value="${classId}"/>
+
+<!--        Modal delete lesson-->
+        <div class="modal fade" id="deleteLessonModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"><i class="material-icons">delete</i></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="modal-body-class">
+
+                    </div>
+                    <div class="modal-footer">
+                        <form id="deleteFormLesson" method="post">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Nie</button>
+                            <button type="submit" class="btn btn-danger" >Usuń</button>
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+<!--        end modal delete lesson -->
+    </div>
+</div>
+
+<!--   Core JS Files   -->
+<script th:src="@{/js/core/jquery.min.js}"></script>
+<script th:src="@{/js/core/popper.min.js}"></script>
+<script th:src="@{/js/core/bootstrap-material-design.min.js}"></script>
+<script th:src="@{/js/plugins/perfect-scrollbar.jquery.min.js}"></script>
+<!-- Plugin for the momentJs  -->
+<script th:src="@{/js/plugins/moment.min.js}"></script>
+<!--  Plugin for Sweet Alert -->
+<script th:src="@{/js/plugins/sweetalert2.js}"></script>
+<!-- Forms Validations Plugin -->
+<script th:src="@{/js/plugins/jquery.validate.min.js}"></script>
+<!-- Plugin for the Wizard, full documentation here: https://github.com/VinceG/twitter-bootstrap-wizard -->
+<script th:src="@{/js/plugins/jquery.bootstrap-wizard.js}"></script>
+<!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+<script th:src="@{/js/plugins/bootstrap-selectpicker.js}"></script>
+<!--  Plugin for the DateTimePicker, full documentation here: https://eonasdan.github.io/bootstrap-datetimepicker/ -->
+<script th:src="@{/js/plugins/bootstrap-datetimepicker.min.js}"></script>
+<!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->
+<script th:src="@{/js/plugins/jquery.dataTables.min.js}"></script>
+<!--	Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
+<script th:src="@{/js/plugins/bootstrap-tagsinput.js}"></script>
+<!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+<script th:src="@{/js/plugins/jasny-bootstrap.min.js}"></script>
+<!--  Full Calendar Plugin, full documentation here: https://github.com/fullcalendar/fullcalendar    -->
+<script th:src="@{/js/plugins/fullcalendar.min.js}"></script>
+<!-- Vector Map plugin, full documentation here: http://jvectormap.com/documentation/ -->
+<script th:src="@{/js/plugins/jquery-jvectormap.js}"></script>
+<!--  Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
+<script th:src="@{/js/plugins/nouislider.min.js}"></script>
+<!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
+<!-- Library for adding dinamically elements -->
+<script th:src="@{/js/plugins/arrive.min.js}"></script>
+<!--  Google Maps Plugin    -->
+<!-- Chartist JS -->
+<script th:src="@{/js/plugins/chartist.min.js}"></script>
+<!--  Notifications Plugin    -->
+<script th:src="@{/js/plugins/bootstrap-notify.js}"></script>
+<!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
+<script th:src="@{/js/material-dashboard.js?v=2.1.2}" type="text/javascript"></script>
+<!-- Material Dashboard DEMO methods, don't include it in your project! -->
+<script th:src="@{/demo/demo.js}"></script>
+<script>
+    $(document).ready(function() {
+        $().ready(function() {
+            $sidebar = $('.sidebar');
+
+            $sidebar_img_container = $sidebar.find('.sidebar-background');
+
+            $full_page = $('.full-page');
+
+            $sidebar_responsive = $('body > .navbar-collapse');
+
+            window_width = $(window).width();
+
+            fixed_plugin_open = $('.sidebar .sidebar-wrapper .nav li.active a p').html();
+
+            if (window_width > 767 && fixed_plugin_open == 'Dashboard') {
+                if ($('.fixed-plugin .dropdown').hasClass('show-dropdown')) {
+                    $('.fixed-plugin .dropdown').addClass('open');
+                }
+
+            }
+
+            $('.fixed-plugin a').click(function(event) {
+                // Alex if we click on switch, stop propagation of the event, so the dropdown will not be hide, otherwise we set the  section active
+                if ($(this).hasClass('switch-trigger')) {
+                    if (event.stopPropagation) {
+                        event.stopPropagation();
+                    } else if (window.event) {
+                        window.event.cancelBubble = true;
+                    }
+                }
+            });
+
+            $('.fixed-plugin .active-color span').click(function() {
+                $full_page_background = $('.full-page-background');
+
+                $(this).siblings().removeClass('active');
+                $(this).addClass('active');
+
+                var new_color = $(this).data('color');
+
+                if ($sidebar.length != 0) {
+                    $sidebar.attr('data-color', new_color);
+                }
+
+                if ($full_page.length != 0) {
+                    $full_page.attr('filter-color', new_color);
+                }
+
+                if ($sidebar_responsive.length != 0) {
+                    $sidebar_responsive.attr('data-color', new_color);
+                }
+            });
+
+            $('.fixed-plugin .background-color .badge').click(function() {
+                $(this).siblings().removeClass('active');
+                $(this).addClass('active');
+
+                var new_color = $(this).data('background-color');
+
+                if ($sidebar.length != 0) {
+                    $sidebar.attr('data-background-color', new_color);
+                }
+            });
+
+            $('.fixed-plugin .img-holder').click(function() {
+                $full_page_background = $('.full-page-background');
+
+                $(this).parent('li').siblings().removeClass('active');
+                $(this).parent('li').addClass('active');
+
+
+                var new_image = $(this).find("img").attr('src');
+
+                if ($sidebar_img_container.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+                    $sidebar_img_container.fadeOut('fast', function() {
+                        $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+                        $sidebar_img_container.fadeIn('fast');
+                    });
+                }
+
+                if ($full_page_background.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+                    var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+                    $full_page_background.fadeOut('fast', function() {
+                        $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+                        $full_page_background.fadeIn('fast');
+                    });
+                }
+
+                if ($('.switch-sidebar-image input:checked').length == 0) {
+                    var new_image = $('.fixed-plugin li.active .img-holder').find("img").attr('src');
+                    var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+                    $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+                    $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+                }
+
+                if ($sidebar_responsive.length != 0) {
+                    $sidebar_responsive.css('background-image', 'url("' + new_image + '")');
+                }
+            });
+
+            $('.switch-sidebar-image input').change(function() {
+                $full_page_background = $('.full-page-background');
+
+                $input = $(this);
+
+                if ($input.is(':checked')) {
+                    if ($sidebar_img_container.length != 0) {
+                        $sidebar_img_container.fadeIn('fast');
+                        $sidebar.attr('data-image', '#');
+                    }
+
+                    if ($full_page_background.length != 0) {
+                        $full_page_background.fadeIn('fast');
+                        $full_page.attr('data-image', '#');
+                    }
+
+                    background_image = true;
+                } else {
+                    if ($sidebar_img_container.length != 0) {
+                        $sidebar.removeAttr('data-image');
+                        $sidebar_img_container.fadeOut('fast');
+                    }
+
+                    if ($full_page_background.length != 0) {
+                        $full_page.removeAttr('data-image', '#');
+                        $full_page_background.fadeOut('fast');
+                    }
+
+                    background_image = false;
+                }
+            });
+
+            $('.switch-sidebar-mini input').change(function() {
+                $body = $('body');
+
+                $input = $(this);
+
+                if (md.misc.sidebar_mini_active == true) {
+                    $('body').removeClass('sidebar-mini');
+                    md.misc.sidebar_mini_active = false;
+
+                    $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar();
+
+                } else {
+
+                    $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar('destroy');
+
+                    setTimeout(function() {
+                        $('body').addClass('sidebar-mini');
+
+                        md.misc.sidebar_mini_active = true;
+                    }, 300);
+                }
+
+                // we simulate the window Resize so the charts will get updated in realtime.
+                var simulateWindowResize = setInterval(function() {
+                    window.dispatchEvent(new Event('resize'));
+                }, 180);
+
+                // we stop the simulation of Window Resize after the animations are completed
+                setTimeout(function() {
+                    clearInterval(simulateWindowResize);
+                }, 1000);
+
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        //init DateTimePickers
+        md.initFormExtendedDatetimepickers();
+    });
+</script>
+
+<!--New grade modal-->
+
+<script>
+    $(document).on("click", ".open-gradeDialogModal", function () {
+
+        var studentId = $(this).data('id');
+        var studentName = $(this).data('name');
+
+        var gradeStudentElem = document.getElementById("gradeStudent");
+        var gradeStudentId = document.getElementById("studentIdVal");
+
+        gradeStudentElem.innerHTML = studentName;
+        gradeStudentId.value = studentId;
+
+    });
+</script>
+
+<!--New grade-->
+
+<script>
+    $(document).on("click", "#sendGrade", function () {
+
+        var addForm = $("#addGradeForm");
+
+        addForm.validate({
+            rules: {
+                gradeValueVal: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 6
+                },
+                gradeWeightVal: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 99
+                },
+                gradeDescVal: {
+                    required: false,
+                    maxlength: 255
+                }
+            },
+
+            messages: {
+                gradeValueVal: {
+                    required: "Nie podano oceny",
+                    min: "Wartosc nie moze być mniejsza od 0",
+                    number: "Wartość musi być liczbą",
+                    max: "Wartość nie może być większa od 6"
+                },
+                gradeWeightVal: {
+                    required: "Nie podano wagi",
+                    min: "Wartość nie może być mniejsza od 0",
+                    number: "Wartość musi być liczbą",
+                    max: "Wartość nie może być większa od 99"
+                },
+                gradeDescVal: {
+                    maxlength: "Opis nie może przekroczyć 255 znaków"
+                }
+            }
+
+        });
+
+        if(addForm.valid()) {
+
+            var csrf = $("#csrfVal").val();
+            var subjectIdVal = $("#subjectIdVal").val();
+            var teacherIdVal = $("#teacherIdVal").val();
+            var studentIdVal = document.getElementById("studentIdVal").value;
+            var lessonIdVal = $("#lessonIdVal").val();
+            var classIdVal = $("#classIdVal").val();
+
+            var btn = $('#sendGrade');
+            btn.prop('disabled', true);
+            setTimeout(function(){
+                btn.prop('disabled', false);
+            }, 700);
+
+
+            var gradeDto = {
+                id: "",
+                value: $("#gradeValueVal").val(),
+                weight: $("#gradeWeightVal").val(),
+                description: $("#gradeDescVal").val(),
+                date: $("#gradeDateVal").val(),
+                teacherId: teacherIdVal,
+                subjectId: subjectIdVal,
+                studentId: studentIdVal,
+            };
+
+            // Creating a XHR object
+            let xhr = new XMLHttpRequest();
+            let url = "/teacher/" + teacherIdVal + "/lesson/subject/" + subjectIdVal + "/" + lessonIdVal + "/newGrade";
+
+            // open a connection
+            xhr.open("POST", url, true);
+
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("_csrf", csrf);
+            xhr.setRequestHeader('x-csrf-token', csrf);
+
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                location.href = "/teacher/" + teacherIdVal + "/lesson/subject/" + subjectIdVal + "/" + classIdVal + "/" + lessonIdVal;
+            };
+
+
+            // Converting JSON data to string
+            var data = JSON.stringify(gradeDto);
+
+            // Sending data with the request
+            xhr.send(data);
+        }
+    });
+</script>
+
+<!--Edit grade modal-->
+<script>
+    $(document).on("click", "#open-gradeDialogModal-editGrade", function () {
+
+        var studentId = $(this).data('id');
+        var studentName = $(this).data('student');
+        var value = $(this).data('value');
+        var weight = $(this).data('weight');
+        var desc = $(this).data('desc');
+        var date = $(this).data('date');
+        var gradeId = $(this).data('grade');
+
+        if (desc == null) {
+            desc = "";
+        }
+
+        var gradeStudentId = document.getElementById("studentIdValEdit");
+
+        gradeStudentId.value = studentId;
+
+        document.getElementById("gradeIdValue").value = gradeId;
+        document.getElementById("studentNameValEdit").value = studentName;
+        document.getElementById("gradeWeightValEdit").value = weight;
+        document.getElementById("gradeValueValEdit").value = value;
+        document.getElementById("gradeDescValEdit").value = desc;
+        document.getElementById("gradeDateValEdit").value = date;
+
+    });
+</script>
+
+<!--Edit grade-->
+
+<script>
+    $(document).on("click", "#editGrade", function () {
+
+        var editForm = $("#editGradeForm");
+
+        editForm.validate({
+            rules: {
+                gradeValueValEdit: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 6
+                },
+                gradeWeightValEdit: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 99
+                },
+                gradeDescValEdit: {
+                    required: false,
+                    maxlength: 255
+                }
+            },
+
+            messages: {
+                gradeValueValEdit: {
+                    required: "Nie podano oceny",
+                    min: "Wartość nie może być mniejsza od 0",
+                    max: "Wartość nie może być większa od 6",
+                    number: "Wartość musi być liczbą"
+                },
+                gradeWeightValEdit: {
+                    required: "Nie podano wagi",
+                    number: "Wartość musi być liczbą",
+                    min: "Wartość nie może być mniejsza od 0",
+                    max: "Wartość nie może być większa od 99"
+                },
+                gradeDescValEdit: {
+                    maxlength: "Opis nie może przekroczyć 255 znaków"
+                }
+            }
+
+        });
+
+        if(editForm.valid()) {
+
+            var csrf = $("#csrfVal").val();
+            var subjectIdVal = $("#subjectIdVal").val();
+            var teacherIdVal = $("#teacherIdVal").val();
+            var studentIdVal = document.getElementById("studentIdValEdit").value;
+            var lessonIdVal = $("#lessonIdVal").val();
+            var classIdVal = $("#classIdVal").val();
+            var gradeIdVal = $("#gradeIdValue").val();
+
+
+            var gradeDto = {
+                id: gradeIdVal,
+                value: $("#gradeValueValEdit").val(),
+                weight: $("#gradeWeightValEdit").val(),
+                description: $("#gradeDescValEdit").val(),
+                date: $("#gradeDateValEdit").val(),
+                teacherId: teacherIdVal,
+                subjectId: subjectIdVal,
+                studentId: studentIdVal,
+            };
+
+            // Creating a XHR object
+            let xhr = new XMLHttpRequest();
+            let url = "/teacher/" + teacherIdVal + "/lesson/subject/" + subjectIdVal + "/" + lessonIdVal + "/newGrade";
+
+            // open a connection
+            xhr.open("POST", url, true);
+
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("_csrf", csrf);
+            xhr.setRequestHeader('x-csrf-token', csrf);
+
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                location.href = "/teacher/" + teacherIdVal + "/lesson/subject/" + subjectIdVal + "/" + classIdVal + "/" + lessonIdVal;
+            };
+
+
+            // Converting JSON data to string
+            var data = JSON.stringify(gradeDto);
+
+            // Sending data with the request
+            xhr.send(data);
+        }
+    });
+</script>
+
+<!--Delete grade-->
+
+<script>
+    $(document).on("click", "#deleteGrade", function () {
+        var csrf= $("#csrfVal").val();
+        var subjectIdVal = $("#subjectIdVal").val();
+        var teacherIdVal = $("#teacherIdVal").val();
+        var studentIdVal = document.getElementById("studentIdValEdit").value;
+        var lessonIdVal = $("#lessonIdVal").val();
+        var classIdVal = $("#classIdVal").val();
+        var gradeIdVal = $("#gradeIdValue").val();
+
+
+
+        // Creating a XHR object
+        let xhr = new XMLHttpRequest();
+        let url = "/teacher/" + teacherIdVal + "/lesson/subject/" + subjectIdVal + "/" + lessonIdVal + "/" + classIdVal
+            + "/" + studentIdVal + "/" + gradeIdVal + "/delete";
+
+        // open a connection
+        xhr.open("POST", url, true);
+
+        // Set the request header i.e. which type of content you are sending
+        xhr.setRequestHeader("_csrf", csrf);
+        xhr.setRequestHeader('x-csrf-token', csrf);
+
+        // Create a state change callback
+        xhr.onreadystatechange = function () {
+            location.href = "/teacher/" + teacherIdVal + "/lesson/subject/" + subjectIdVal + "/" + classIdVal + "/" + lessonIdVal;
+        };
+
+
+        // Sending data with the request
+        xhr.send();
+    });
+</script>
+
+
+
+<!--Delete lesson modal action-->
+<script>
+    $(document).on("click", ".open-gradeDialogModalLessonDelete", function () {
+
+        var lessonId = $(this).data('lesson');
+        var teacherId = $(this).data('teacher');
+        var subjectId = $(this).data('subject');
+        var classId = $(this).data('class')
+
+        var lessonInfo = document.getElementById("modal-body-class");
+
+        lessonInfo.innerHTML = "Napewno chcesz usunąć tą lekcje?";
+
+
+        var deleteForm = document.getElementById("deleteFormLesson");
+
+        deleteForm.setAttribute("action", "/teacher/" + teacherId + "/lesson/subject/" + subjectId + "/" + classId
+            + "/" + lessonId + "/delete");
+    });
+</script>
+
+</body>
+
+</html>

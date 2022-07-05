@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/apple-icon.png}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>
+        E-dziennik
+    </title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport">
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <!-- CSS Files -->
+    <link th:href="@{/css/material-dashboard.css}" rel="stylesheet">
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link th:href="@{/demo/demo.css}" rel="stylesheet">
+</head>
+
+<body>
+<th:block th:fragment="menuDeputyHead">
+
+    <span th:replace="fragments/menuUser :: menuUser"></span>
+
+    <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+            <a th:href="@{'/deputyHead/newClass/formTutor'}">
+                <div class="card-header card-header-primary card-header-icon">
+                    <div class="card-icon">
+                        <i class="material-icons">post_add</i>
+                    </div>
+                    <h3 class="card-title">Tworzenie klas</h3>
+                </div>
+            </a>
+            <div class="card-footer">
+                <div class="stats">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+            <a th:href="@{'/deputyHead/classes'}">
+                <div class="card-header card-header-primary card-header-icon">
+                    <div class="card-icon">
+                        <i class="material-icons">room_preferences</i>
+                    </div>
+                    <h3 class="card-title">Zarządzanie klasami</h3>
+                </div>
+            </a>
+            <div class="card-footer">
+                <div class="stats">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div sec:authorize="hasRole('HEADMASTER')" class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+            <a  th:href="@{'/headmaster/teacherReport'}">
+                <div class="card-header card-header-primary card-header-icon">
+                    <div class="card-icon">
+                        <i class="material-icons">assignment_ind</i>
+                    </div>
+                    <h3 class="card-title">Raport o nauczycielu</h3>
+                </div>
+            </a>
+            <div class="card-footer">
+                <div class="stats">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div sec:authorize="hasRole('HEADMASTER')" class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+            <a  th:href="@{'/headmaster/closeYear'}">
+                <div class="card-header card-header-primary card-header-icon">
+                    <div class="card-icon">
+                        <i class="material-icons">cancel</i>
+                    </div>
+                    <h3 class="card-title">Zamknij rok</h3>
+                </div>
+            </a>
+            <div class="card-footer">
+                <div class="stats">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div sec:authorize="hasRole('HEADMASTER')" class="col-lg-3 col-md-6 col-sm-6">
+        <div class="card card-stats">
+            <a  th:href="@{'/headmaster/endYearReports'}">
+                <div class="card-header card-header-primary card-header-icon">
+                    <div class="card-icon">
+                        <i class="material-icons">preview</i>
+                    </div>
+                    <h3 class="card-title">Poprzednie lata</h3>
+                </div>
+            </a>
+            <div class="card-footer">
+                <div class="stats">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+</body>
+</html>

@@ -1,0 +1,1235 @@
+<!--
+=========================================================
+Material Dashboard - v2.1.2
+=========================================================
+
+Product Page: https://www.creative-tim.com/product/material-dashboard
+Copyright 2020 Creative Tim (https://www.creative-tim.com)
+Coded by Creative Tim
+
+=========================================================
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="apple-touch-icon" sizes="76x76" th:href="@{/img/apple-icon.png}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        E-dziennik
+    </title>
+    <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <!-- CSS Files -->
+    <link th:href="@{/css/material-dashboard.css}" rel="stylesheet" />
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link th:href="@{/demo/demo.css}" rel="stylesheet" />
+    <style>
+        label.error{
+            color:red;
+        }
+    </style>
+</head>
+
+<body class="">
+<div class="wrapper ">
+
+    <div th:replace="fragments/sidebarTeacher :: sidebar('grades')"></div>
+
+    <div class="main-panel">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+            <div class="container-fluid">
+                <div class="navbar-wrapper">
+                    <a class="navbar-brand" th:href="@{/teacher/{teacherId}/grade/subject(teacherId=${teacherId})}">Przedmioty</a>
+                    <a th:text="'>'"></a>
+                    <a class="navbar-brand"  th:href="@{/teacher/{teacherId}/grade/subject/{subjectId}(teacherId=${teacherId}, subjectId=${subjectId})}">Oceny</a>
+                </div>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                </button>
+                <div th:replace="fragments/optionsBar :: optionsBar"> </div>
+            </div>
+        </nav>
+        <!-- End Navbar -->
+        <div class="content">
+            <div th:if="${studentsWithGrades == null}" class="navbar-wrapper">
+                <div class="d-flex justify-content-center">
+                    <h2 class="navbar-brand">Nie znaleziono żadnych ocen</h2>
+                </div>
+            </div>
+        <div class="card">
+            <div class="container-fluid" th:if="${studentsWithGrades != null}">
+                <div class="tab-pane show active" id="grades" role="tabpanel" aria-labelledby="nav-home">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead class=" text-primary">
+                                <th class="col-lg-1">Nr. </th>
+                                <th class="col-lg-2">Imie</th>
+                                <th  class="text-center col-lg-6" th:colspan="${maxGrades.size() + 1}">Oceny</th>
+                                <th  class="text-center col-lg-1">Średnia</th>
+                                <th  class="text-center col-lg-2">Ocena końcowa</th>
+                                </thead>
+                                <tbody>
+                                <tr th:id="'student' + ${student.id}" class="students" th:each="student : ${studentsWithGrades.keySet()}" >
+                                    <td th:text="${studentStat.index + 1}">
+                                        Nr.
+                                    </td>
+                                    <td th:text="${student?.userName}" class="border-right">
+                                        Imie
+                                    </td>
+                                    <td class="grades" th:each="grade : ${studentsWithGrades?.get(student)}" th:value="${grade?.value}">
+                                        <input type="hidden" th:value="${grade?.weight}">
+                                        <a data-toggle="modal" id="open-gradeDialogModal-editGrade" class="open-gradeDialogModal btn-sm btn-info" href="#editGradeModal"
+                                           th:attr="data-date=''+${grade.date}+'', data-target='#editGradeModal', data-value=''+${grade.value}+'', data-weight=''+${grade.weight}+'',
+                                                       data-student=''+${grade.studentName}+'', data-desc=''+${grade.description}+'', data-id=''+${student.id}+'', data-grade=''+${grade.id}+''"
+                                           th:text="${grade?.value}">
+                                        </a>
+                                    </td>
+                                    <th:block th:each="field : ${maxGrades}">
+                                        <td th:if="${fieldStat.index} < ${maxGrades.size() - studentsWithGrades?.get(student).size()}" th:text="' '">
+
+                                        </td>
+                                    </th:block>
+                                    <td>
+                                        <a id="open-gradeDialogModal" data-toggle="modal" class="open-gradeDialogModal" href="#addGradeModal"
+                                           th:attr="data-id=''+${student.id}+'', data-target='#addGradeModal', data-name=''+${student.userName}+''">
+                                            <button class="btn btn-fab-mini btn-round">
+                                                <i class="material-icons">add_circle</i>&nbsp
+                                            </button>
+                                        </a>
+                                    </td>
+                                    <td class="averageGrade border-left text-center" >
+                                    </td>
+                                    <td class="border-left text-center">
+                                        <a th:if="${studentsWithFinalGrades?.get(student.id)?.value != null}" data-toggle="modal" id="open-gradeDialogModal-editFinalGrade" class="open-gradeDialogModal-editFinalGrade btn-sm btn-danger" href="#editFinalGradeModal"
+                                           th:text="${studentsWithFinalGrades?.get(student.id)?.value}" th:attr="data-date=''+${studentsWithFinalGrades?.get(student.id)?.date}+'', data-target='#editFinalGradeModal', data-value=''+${studentsWithFinalGrades?.get(student.id)?.value}+'', data-weight=''+${studentsWithFinalGrades?.get(student.id)?.weight}+'',
+                                                       data-student=''+${studentsWithFinalGrades?.get(student.id)?.studentName}+'', data-desc=''+${studentsWithFinalGrades?.get(student.id)?.description}+'', data-id=''+${student.id}+'', data-grade=''+${studentsWithFinalGrades?.get(student.id)?.id}+''">
+                                        </a>&nbsp;&nbsp;
+                                        <a th:if="${studentsWithFinalGrades?.get(student.id)?.value == null}" id="open-gradeDialogModal-finalGrade" data-toggle="modal" class="open-gradeDialogModal-finalGrade" href="#addFinalGradeModal"
+                                           th:attr="data-id=''+${student.id}+'', data-target='#addFinalGradeModal', data-name=''+${student.userName}+''">
+                                            <button class="btn btn-fab-mini btn-round">
+                                                <i class="material-icons">add_circle</i>&nbsp
+                                            </button>
+                                        </a>
+                                    </td>
+                                </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <!--Modals-->
+                    <!-- Modal add grade -->
+                    <div class="modal fade" id="addGradeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Dodaj Ocene: </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <form id="addGradeForm" method="post" >
+                                    <div class="modal-body">
+                                        <div class="content">
+                                            <div class="container-fluid">
+                                                <div class="card">
+                                                    <div class="table-responsive">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <td id="gradeStudent">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating">Uczeń: </label>
+                                                                        <input  id="studentNameVal" type="text" class="form-control" disabled>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeValue">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating">Ocena: </label>
+                                                                        <input  id="gradeValueVal" name="gradeValueVal" type="text" class="form-control">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeWeight">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating">Waga</label>
+                                                                        <input  id="gradeWeightVal" name="gradeWeightVal" class="form-control" type="text"/>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeDescription">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating">Opis</label>
+                                                                        <textarea  id="gradeDescVal" name="gradeDescVal" class="form-control" rows="3" maxlength="255"></textarea>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeDate">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating">Data</label>
+                                                                        <input  id="gradeDateValDisplay" class="form-control" th:value="${#dates.format(grade.date , 'dd-MM-yyyy HH:mm:ss')}" disabled/>
+                                                                        <input type="hidden" id="gradeDateVal" th:value="${#dates.format(grade.date , 'yyyy-MM-dd HH:mm:ss')}">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <input id="studentIdVal" type="hidden" disabled/>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Anuluj</button>
+                                        <button id="sendGrade" type="button" class="btn btn-success" >Dodaj</button>
+                                        <input id="csrfVal" type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- end of add grade modal -->
+
+                    <!-- Modal edit grade -->
+                    <div class="modal fade" id="editGradeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Ocena: </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <form id="editGradeForm" method="post" >
+                                    <div class="modal-body">
+                                        <div class="content">
+                                            <div class="container-fluid">
+                                                <div class="card">
+                                                    <div class="table-responsive">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <td id="gradeStudentEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static " th:text="'Uczeń'" disabled> </label>
+                                                                        <input  id="studentNameValEdit" type="text" class="form-control" disabled>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeValueEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static" th:text="'Ocena'"> </label>
+                                                                        <input  id="gradeValueValEdit" name="gradeValueValEdit" type="text" class="form-control">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeWeightEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static" th:text="'Waga'"></label>
+                                                                        <input  id="gradeWeightValEdit" name="gradeWeightValEdit" class="form-control" type="text"/>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeDescriptionEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static" th:text="'Opis'"></label>
+                                                                        <textarea  id="gradeDescValEdit" name="gradeDescValEdit" class="form-control" rows="3" maxlength="255"></textarea>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeDateEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static" th:text="'Data'"></label>
+                                                                        <input  id="gradeDateValEditD" class="form-control" type="text" th:value="${#dates.format(grade.date , 'dd-MM-yyyy HH:mm:ss')}" disabled/>
+                                                                        <input type="hidden" id="gradeDateValEdit" th:value="${#dates.format(grade.date , 'yyyy-MM-dd HH:mm:ss')}">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <input id="studentIdValEdit" type="hidden" disabled/>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Anuluj</button>
+                                        <input id="gradeIdValue" type="hidden" disabled/>
+                                        <button id="deleteGrade" type="button" class="btn btn-danger ">Usuń</button>
+                                        <button id="editGrade" type="button" class="btn btn-success" >Zapisz</button>
+                                        <!--                                    id="editGrade" -->
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- end edit grade -->
+
+                    <!-- Modal add final grade -->
+                    <div class="modal fade" id="addFinalGradeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Dodaj Ocene końcową: </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <form id="addFinalGradeForm" method="post" >
+                                    <div class="modal-body">
+                                        <div class="content">
+                                            <div class="container-fluid">
+                                                <div class="card">
+                                                    <div class="table-responsive">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <td id="finalGradeStudent">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating is-filled" th:text="'Uczeń'">Uczeń: </label>
+                                                                        <input  id="studentNameValFinal" type="text" class="form-control" disabled>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeValueF">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating" th:text="'Ocena'">Ocena: </label>
+                                                                        <input  id="gradeValueValFinal" name="gradeValueValFinal" type="text"  class="form-control">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+
+                                                            <input type="hidden" id="gradeWeightValFinal" name="gradeWeightValFinal" class="form-control" th:value="${finalGrade.weight}" disabled />
+
+                                                            <tr>
+                                                                <td id="gradeDescriptionF">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating is-filled" th:text="'Opis'">Opis</label>
+                                                                        <input type="text"  id="gradeDescValFinal" name="gradeDescValFinal" class="form-control" th:value="${finalGrade.description}" disabled/>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeDateF">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-floating is-filled" th:text="'Data'">Data</label>
+                                                                        <input  id="gradeDateValDisplayF" class="form-control" th:value="${#dates.format(grade.date , 'dd-MM-yyyy HH:mm:ss')}" disabled/>
+                                                                        <input type="hidden" id="gradeDateValFinal" th:value="${#dates.format(grade.date , 'yyyy-MM-dd HH:mm:ss')}">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+
+                                                            <input id="studentIdValFinal" type="hidden" disabled/>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Anuluj</button>
+                                        <button id="addFinalGrade" type="button" class="btn btn-success" >Dodaj</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- end of add final grade modal -->
+
+                    <!-- Modal edit final grade -->
+                    <div class="modal fade" id="editFinalGradeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Ocena końcowa: </h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <form id="editFinalGradeForm" method="post" >
+                                    <div class="modal-body">
+                                        <div class="content">
+                                            <div class="container-fluid">
+                                                <div class="card">
+                                                    <div class="table-responsive">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <td id="gradeFStudentEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static " th:text="'Uczeń'" disabled=""> </label>
+                                                                        <input  id="studentFNameValEdit" type="text" class="form-control" disabled>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeFValueEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static" th:text="'Ocena'"> </label>
+                                                                        <input  id="gradeFValueValEdit" name="gradeFValueValEdit" type="text"  class="form-control">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+
+                                                            <input  type="hidden" id="gradeFWeightValEdit" name="gradeFWeightValEdit" class="form-control" disabled/>
+
+                                                            <tr>
+                                                                <td id="gradeFDescriptionEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static" th:text="'Opis'"></label>
+                                                                        <textarea  id="gradeFDescValEdit"  class="form-control" rows="3" disabled></textarea>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td id="gradeFDateEdit">
+                                                                    <div class="form-group">
+                                                                        <label class="bmd-label-static" th:text="'Data'"></label>
+                                                                        <input  id="gradeFDateValEditD" class="form-control" type="text" th:value="${#dates.format(grade.date , 'dd-MM-yyyy HH:mm:ss')}" disabled/>
+                                                                        <input type="hidden" id="gradeFDateValEdit" th:value="${#dates.format(grade.date , 'yyyy-MM-dd HH:mm:ss')}">
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <input id="studentFIdValEdit" type="hidden" disabled/>
+
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Anuluj</button>
+                                        <input id="gradeFIdValue" type="hidden" disabled/>
+                                        <button id="deleteFGrade" type="button" class="btn btn-danger ">Usuń</button>
+                                        <button id="editFGrade" type="button" class="btn btn-success" >Zapisz</button>
+                                        <!--                                    id="editGrade" -->
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- end edit grade -->
+
+
+                    <input id="subjectIdVal" type="hidden" th:value="${grade.subjectId}"/>
+                    <input id="teacherIdVal" type="hidden" th:value="${grade.teacherId}"/>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<!--   Core JS Files   -->
+<script th:src="@{/js/core/jquery.min.js}"></script>
+<script th:src="@{/js/core/popper.min.js}"></script>
+<script th:src="@{/js/core/bootstrap-material-design.min.js}"></script>
+<script th:src="@{/js/plugins/perfect-scrollbar.jquery.min.js}"></script>
+<!-- Plugin for the momentJs  -->
+<script th:src="@{/js/plugins/moment.min.js}"></script>
+<!--  Plugin for Sweet Alert -->
+<script th:src="@{/js/plugins/sweetalert2.js}"></script>
+<!-- Forms Validations Plugin -->
+<script th:src="@{/js/plugins/jquery.validate.min.js}"></script>
+<!-- Plugin for the Wizard, full documentation here: https://github.com/VinceG/twitter-bootstrap-wizard -->
+<script th:src="@{/js/plugins/jquery.bootstrap-wizard.js}"></script>
+<!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+<script th:src="@{/js/plugins/bootstrap-selectpicker.js}"></script>
+<!--  Plugin for the DateTimePicker, full documentation here: https://eonasdan.github.io/bootstrap-datetimepicker/ -->
+<script th:src="@{/js/plugins/bootstrap-datetimepicker.min.js}"></script>
+<!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->
+<script th:src="@{/js/plugins/jquery.dataTables.min.js}"></script>
+<!--	Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
+<script th:src="@{/js/plugins/bootstrap-tagsinput.js}"></script>
+<!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+<script th:src="@{/js/plugins/jasny-bootstrap.min.js}"></script>
+<!--  Full Calendar Plugin, full documentation here: https://github.com/fullcalendar/fullcalendar    -->
+<script th:src="@{/js/plugins/fullcalendar.min.js}"></script>
+<!-- Vector Map plugin, full documentation here: http://jvectormap.com/documentation/ -->
+<script th:src="@{/js/plugins/jquery-jvectormap.js}"></script>
+<!--  Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
+<script th:src="@{/js/plugins/nouislider.min.js}"></script>
+<!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
+<!-- Library for adding dinamically elements -->
+<script th:src="@{/js/plugins/arrive.min.js}"></script>
+<!--  Google Maps Plugin    -->
+<!-- Chartist JS -->
+<script th:src="@{/js/plugins/chartist.min.js}"></script>
+<!--  Notifications Plugin    -->
+<script th:src="@{/js/plugins/bootstrap-notify.js}"></script>
+<!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
+<script th:src="@{/js/material-dashboard.js?v=2.1.2}" type="text/javascript"></script>
+<!-- Material Dashboard DEMO methods, don't include it in your project! -->
+<script th:src="@{/demo/demo.js}"></script>
+<script>
+    $(document).ready(function() {
+        $().ready(function() {
+            $sidebar = $('.sidebar');
+
+            $sidebar_img_container = $sidebar.find('.sidebar-background');
+
+            $full_page = $('.full-page');
+
+            $sidebar_responsive = $('body > .navbar-collapse');
+
+            window_width = $(window).width();
+
+            fixed_plugin_open = $('.sidebar .sidebar-wrapper .nav li.active a p').html();
+
+            if (window_width > 767 && fixed_plugin_open == 'Dashboard') {
+                if ($('.fixed-plugin .dropdown').hasClass('show-dropdown')) {
+                    $('.fixed-plugin .dropdown').addClass('open');
+                }
+
+            }
+
+            $('.fixed-plugin a').click(function(event) {
+                // Alex if we click on switch, stop propagation of the event, so the dropdown will not be hide, otherwise we set the  section active
+                if ($(this).hasClass('switch-trigger')) {
+                    if (event.stopPropagation) {
+                        event.stopPropagation();
+                    } else if (window.event) {
+                        window.event.cancelBubble = true;
+                    }
+                }
+            });
+
+            $('.fixed-plugin .active-color span').click(function() {
+                $full_page_background = $('.full-page-background');
+
+                $(this).siblings().removeClass('active');
+                $(this).addClass('active');
+
+                var new_color = $(this).data('color');
+
+                if ($sidebar.length != 0) {
+                    $sidebar.attr('data-color', new_color);
+                }
+
+                if ($full_page.length != 0) {
+                    $full_page.attr('filter-color', new_color);
+                }
+
+                if ($sidebar_responsive.length != 0) {
+                    $sidebar_responsive.attr('data-color', new_color);
+                }
+            });
+
+            $('.fixed-plugin .background-color .badge').click(function() {
+                $(this).siblings().removeClass('active');
+                $(this).addClass('active');
+
+                var new_color = $(this).data('background-color');
+
+                if ($sidebar.length != 0) {
+                    $sidebar.attr('data-background-color', new_color);
+                }
+            });
+
+            $('.fixed-plugin .img-holder').click(function() {
+                $full_page_background = $('.full-page-background');
+
+                $(this).parent('li').siblings().removeClass('active');
+                $(this).parent('li').addClass('active');
+
+
+                var new_image = $(this).find("img").attr('src');
+
+                if ($sidebar_img_container.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+                    $sidebar_img_container.fadeOut('fast', function() {
+                        $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+                        $sidebar_img_container.fadeIn('fast');
+                    });
+                }
+
+                if ($full_page_background.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+                    var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+                    $full_page_background.fadeOut('fast', function() {
+                        $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+                        $full_page_background.fadeIn('fast');
+                    });
+                }
+
+                if ($('.switch-sidebar-image input:checked').length == 0) {
+                    var new_image = $('.fixed-plugin li.active .img-holder').find("img").attr('src');
+                    var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+                    $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+                    $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+                }
+
+                if ($sidebar_responsive.length != 0) {
+                    $sidebar_responsive.css('background-image', 'url("' + new_image + '")');
+                }
+            });
+
+            $('.switch-sidebar-image input').change(function() {
+                $full_page_background = $('.full-page-background');
+
+                $input = $(this);
+
+                if ($input.is(':checked')) {
+                    if ($sidebar_img_container.length != 0) {
+                        $sidebar_img_container.fadeIn('fast');
+                        $sidebar.attr('data-image', '#');
+                    }
+
+                    if ($full_page_background.length != 0) {
+                        $full_page_background.fadeIn('fast');
+                        $full_page.attr('data-image', '#');
+                    }
+
+                    background_image = true;
+                } else {
+                    if ($sidebar_img_container.length != 0) {
+                        $sidebar.removeAttr('data-image');
+                        $sidebar_img_container.fadeOut('fast');
+                    }
+
+                    if ($full_page_background.length != 0) {
+                        $full_page.removeAttr('data-image', '#');
+                        $full_page_background.fadeOut('fast');
+                    }
+
+                    background_image = false;
+                }
+            });
+
+            $('.switch-sidebar-mini input').change(function() {
+                $body = $('body');
+
+                $input = $(this);
+
+                if (md.misc.sidebar_mini_active == true) {
+                    $('body').removeClass('sidebar-mini');
+                    md.misc.sidebar_mini_active = false;
+
+                    $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar();
+
+                } else {
+
+                    $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar('destroy');
+
+                    setTimeout(function() {
+                        $('body').addClass('sidebar-mini');
+
+                        md.misc.sidebar_mini_active = true;
+                    }, 300);
+                }
+
+                // we simulate the window Resize so the charts will get updated in realtime.
+                var simulateWindowResize = setInterval(function() {
+                    window.dispatchEvent(new Event('resize'));
+                }, 180);
+
+                // we stop the simulation of Window Resize after the animations are completed
+                setTimeout(function() {
+                    clearInterval(simulateWindowResize);
+                }, 1000);
+
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        //init DateTimePickers
+        md.initFormExtendedDatetimepickers();
+    });
+</script>
+<!--New grade modal-->
+
+<script>
+    $(document).on("click", ".open-gradeDialogModal", function () {
+
+        var studentId = $(this).data('id');
+        var studentName = $(this).data('name');
+
+        var gradeStudentElem = document.getElementById("gradeStudent");
+        var gradeStudentId = document.getElementById("studentIdVal");
+
+        gradeStudentElem.innerHTML = studentName;
+        gradeStudentId.value = studentId;
+
+    });
+</script>
+
+<!--New grade-->
+
+<script>
+    $(document).on("click", "#sendGrade", function () {
+        var addForm = $("#addGradeForm");
+
+        addForm.validate({
+            rules: {
+                gradeValueVal: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 6
+                },
+                gradeWeightVal: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 99
+                },
+                gradeDescVal: {
+                    required: false,
+                    maxlength: 255
+                }
+            },
+
+            messages: {
+                gradeValueVal: {
+                    required: "Nie podano oceny",
+                    min: "Wartosc nie moze być mniejsza od 0",
+                    number: "Wartość musi być liczbą",
+                    max: "Wartość nie może być większa od 6"
+                },
+                gradeWeightVal: {
+                    required: "Nie podano wagi",
+                    min: "Wartość nie może być mniejsza od 0",
+                    number: "Wartość musi być liczbą",
+                    max: "Wartość nie może być większa od 99"
+                },
+                gradeDescVal: {
+                    maxlength: "Opis nie może przekroczyć 255 znaków"
+                }
+            }
+
+        });
+
+        if(addForm.valid()) {
+
+            var csrf = $("#csrfVal").val();
+            var subjectIdVal = $("#subjectIdVal").val();
+            var teacherIdVal = $("#teacherIdVal").val();
+            var studentIdVal = document.getElementById("studentIdVal").value;
+
+            var btn = $('#sendGrade');
+            btn.prop('disabled', true);
+            setTimeout(function(){
+                btn.prop('disabled', false);
+            }, 700);
+
+            var gradeDto = {
+                id: "",
+                value: $("#gradeValueVal").val(),
+                weight: $("#gradeWeightVal").val(),
+                description: $("#gradeDescVal").val(),
+                date: $("#gradeDateVal").val(),
+                teacherId: teacherIdVal,
+                subjectId: subjectIdVal,
+                studentId: studentIdVal,
+            };
+
+            // Creating a XHR object
+            let xhr = new XMLHttpRequest();
+            let url = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal + "/newGrade";
+
+            // open a connection
+            xhr.open("POST", url, true);
+
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("_csrf", csrf);
+            xhr.setRequestHeader('x-csrf-token', csrf);
+
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                location.href = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal;
+            };
+
+
+            // Converting JSON data to string
+            var data = JSON.stringify(gradeDto);
+
+            // Sending data with the request
+            xhr.send(data);
+
+
+        }
+    });
+</script>
+
+<!--Edit grade modal-->
+<script>
+    $(document).on("click", "#open-gradeDialogModal-editGrade", function () {
+
+        var studentId = $(this).data('id');
+        var studentName = $(this).data('student');
+        var value = $(this).data('value');
+        var weight = $(this).data('weight');
+        var desc = $(this).data('desc');
+        var date = $(this).data('date');
+        var gradeId = $(this).data('grade');
+
+        if (desc == null) {
+            desc = "";
+        }
+
+        var gradeStudentId = document.getElementById("studentIdValEdit");
+
+        gradeStudentId.value = studentId;
+
+        document.getElementById("gradeIdValue").value = gradeId;
+        document.getElementById("studentNameValEdit").value = studentName;
+        document.getElementById("gradeWeightValEdit").value = weight;
+        document.getElementById("gradeValueValEdit").value = value;
+        document.getElementById("gradeDescValEdit").value = desc;
+        document.getElementById("gradeDateValEdit").value = date;
+
+    });
+</script>
+
+<!--Edit grade-->
+
+<script>
+    $(document).on("click", "#editGrade", function () {
+
+        var editForm = $("#editGradeForm");
+
+        editForm.validate({
+            rules: {
+                gradeValueValEdit: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 6
+                },
+                gradeWeightValEdit: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 99
+                },
+                gradeDescValEdit: {
+                    required: false,
+                    maxlength: 255
+                }
+            },
+
+            messages: {
+                gradeValueValEdit: {
+                    required: "Nie podano oceny",
+                    min: "Wartość nie może być mniejsza od 0",
+                    max: "Wartość nie może być większa od 6",
+                    number: "Wartość musi być liczbą"
+                },
+                gradeWeightValEdit: {
+                    required: "Nie podano wagi",
+                    number: "Wartość musi być liczbą",
+                    min: "Wartość nie może być mniejsza od 0",
+                    max: "Wartość nie może być większa od 99"
+                },
+                gradeDescValEdit: {
+                    maxlength: "Opis nie może przekroczyć 255 znaków"
+                }
+            }
+
+        });
+
+        if(editForm.valid()) {
+
+            var csrf = $("#csrfVal").val();
+            var subjectIdVal = $("#subjectIdVal").val();
+            var teacherIdVal = $("#teacherIdVal").val();
+            var studentIdVal = document.getElementById("studentIdValEdit").value;
+            var gradeIdVal = $("#gradeIdValue").val();
+
+
+            var gradeDto = {
+                id: gradeIdVal,
+                value: $("#gradeValueValEdit").val(),
+                weight: $("#gradeWeightValEdit").val(),
+                description: $("#gradeDescValEdit").val(),
+                date: $("#gradeDateValEdit").val(),
+                teacherId: teacherIdVal,
+                subjectId: subjectIdVal,
+                studentId: studentIdVal,
+            };
+
+            // Creating a XHR object
+            let xhr = new XMLHttpRequest();
+            let url = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal + "/updateGrade";
+
+            // open a connection
+            xhr.open("POST", url, true);
+
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("_csrf", csrf);
+            xhr.setRequestHeader('x-csrf-token', csrf);
+
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                location.href = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal;
+            };
+
+
+            // Converting JSON data to string
+            var data = JSON.stringify(gradeDto);
+
+            // Sending data with the request
+            xhr.send(data);
+        }
+    });
+</script>
+
+<!--Delete grade-->
+
+<script>
+    $(document).on("click", "#deleteGrade", function () {
+        var csrf= $("#csrfVal").val();
+        var subjectIdVal = $("#subjectIdVal").val();
+        var teacherIdVal = $("#teacherIdVal").val();
+        var studentIdVal = document.getElementById("studentIdValEdit").value;
+        var gradeIdVal = $("#gradeIdValue").val();
+
+
+
+        // Creating a XHR object
+        let xhr = new XMLHttpRequest();
+        let url = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal + "/" + studentIdVal + "/" + gradeIdVal + "/deleteGrade";
+
+        // open a connection
+        xhr.open("POST", url, true);
+
+        // Set the request header i.e. which type of content you are sending
+        xhr.setRequestHeader("_csrf", csrf);
+        xhr.setRequestHeader('x-csrf-token', csrf);
+
+        // Create a state change callback
+        xhr.onreadystatechange = function () {
+            location.href = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal;
+        };
+
+
+        // Sending data with the request
+        xhr.send();
+    });
+</script>
+
+<!--add final grade modal-->
+<script>
+    $(document).on("click", ".open-gradeDialogModal-finalGrade", function () {
+
+        var studentId = $(this).data('id');
+        var studentName = $(this).data('name');
+
+        var gradeStudentElem = document.getElementById("finalGradeStudent");
+        var gradeStudentId = document.getElementById("studentIdValFinal");
+
+        gradeStudentElem.innerHTML = studentName;
+        gradeStudentId.value = studentId;
+    });
+</script>
+
+<!--add final grade-->
+
+<script>
+    $(document).on("click", "#addFinalGrade", function () {
+        var editForm = $("#addFinalGradeForm");
+
+        editForm.validate({
+            rules: {
+                gradeValueValFinal: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 6
+                },
+                gradeWeightValFinal: {
+                    required: true,
+                    number: true,
+                    min: 100,
+                    max: 100
+                }
+            },
+
+            messages: {
+                gradeValueValFinal: {
+                    required: "Nie podano oceny",
+                    min: "Wartość nie może być mniejsza od 0",
+                    max: "Wartość nie może być większa od 6",
+                    number: "Wartość musi być liczbą"
+                },
+                gradeWeightValFinal: {
+                    required: "Nie podano oceny",
+                    min: "Wartość musi być równa 100",
+                    max: "Wartość musi być równa 100",
+                    number: "Wartość musi być liczbą"
+                }
+            }
+
+        });
+
+        if(editForm.valid()) {
+
+            var csrf = $("#csrfVal").val();
+            var subjectIdVal = $("#subjectIdVal").val();
+            var teacherIdVal = $("#teacherIdVal").val();
+            var studentIdVal = document.getElementById("studentIdValFinal").value;
+
+            var btn = $('#addFinalGrade');
+            btn.prop('disabled', true);
+            setTimeout(function(){
+                btn.prop('disabled', false);
+            }, 700);
+
+            var gradeDto = {
+                id: "",
+                value: $("#gradeValueValFinal").val(),
+                weight: $("#gradeWeightValFinal").val(),
+                description: $("#gradeDescValFinal").val(),
+                date: $("#gradeDateValFinal").val(),
+                teacherId: teacherIdVal,
+                subjectId: subjectIdVal,
+                studentId: studentIdVal,
+            };
+
+
+            let xhr = new XMLHttpRequest();
+            let url = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal + "/newFinalGrade";
+
+            // open a connection
+            xhr.open("POST", url, true);
+
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("_csrf", csrf);
+            xhr.setRequestHeader('x-csrf-token', csrf);
+
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                location.href = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal;
+            };
+
+
+            // Converting JSON data to string
+            var data = JSON.stringify(gradeDto);
+
+            // Sending data with the request
+            xhr.send(data);
+        }
+    });
+</script>
+
+<!--Edit final grade modal-->
+<script>
+    $(document).on("click", ".open-gradeDialogModal-editFinalGrade", function () {
+
+        var studentId = $(this).data('id');
+        var studentName = $(this).data('student');
+        var value = $(this).data('value');
+        var weight = $(this).data('weight');
+        var desc = $(this).data('desc');
+        var date = $(this).data('date');
+        var gradeId = $(this).data('grade');
+
+        if (desc == null) {
+            desc = "";
+        }
+
+        var gradeStudentId = document.getElementById("studentFIdValEdit");
+
+        gradeStudentId.value = studentId;
+
+        document.getElementById("gradeFIdValue").value = gradeId;
+        document.getElementById("studentFNameValEdit").value = studentName;
+        document.getElementById("gradeFWeightValEdit").value = weight;
+        document.getElementById("gradeFValueValEdit").value = value;
+        document.getElementById("gradeFDescValEdit").value = desc;
+        document.getElementById("gradeFDateValEdit").value = date;
+
+    });
+</script>
+
+
+<!--Delete final grade-->
+
+<script>
+    $(document).on("click", "#deleteFGrade", function () {
+        var csrf= $("#csrfVal").val();
+        var subjectIdVal = $("#subjectIdVal").val();
+        var teacherIdVal = $("#teacherIdVal").val();
+        var studentIdVal = document.getElementById("studentFIdValEdit").value;
+        var gradeIdVal = $("#gradeFIdValue").val();
+
+
+
+        // Creating a XHR object
+        let xhr = new XMLHttpRequest();
+        let url = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal + "/" + studentIdVal + "/" + gradeIdVal + "/deleteFinalGrade";
+
+        // open a connection
+        xhr.open("POST", url, true);
+
+        // Set the request header i.e. which type of content you are sending
+        xhr.setRequestHeader("_csrf", csrf);
+        xhr.setRequestHeader('x-csrf-token', csrf);
+
+        // Create a state change callback
+        xhr.onreadystatechange = function () {
+            location.href = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal;
+        };
+
+        // Sending data with the request
+        xhr.send();
+    });
+</script>
+
+<!--Edit final grade-->
+
+<script>
+    $(document).on("click", "#editFGrade", function () {
+
+        var editForm = $("#editFinalGradeForm");
+
+        editForm.validate({
+            rules: {
+                gradeFValueValEdit: {
+                    required: true,
+                    number: true,
+                    min: 1,
+                    max: 6
+                },
+                gradeFWeightValEdit: {
+                    required: true,
+                    number: true,
+                    min: 100,
+                    max: 100
+                }
+            },
+
+            messages: {
+                gradeFValueValEdit: {
+                    required: "Nie podano oceny",
+                    min: "Wartość nie może być mniejsza od 0",
+                    max: "Wartość nie może być większa od 6",
+                    number: "Wartość musi być liczbą"
+                },
+                gradeFWeightValEdit: {
+                    required: "Nie podano oceny",
+                    min: "Wartość musi być równa 100",
+                    max: "Wartość musi być równa 100",
+                    number: "Wartość musi być liczbą"
+                }
+            }
+
+        });
+
+        if(editForm.valid()) {
+
+            var csrf = $("#csrfVal").val();
+            var subjectIdVal = $("#subjectIdVal").val();
+            var teacherIdVal = $("#teacherIdVal").val();
+            var studentIdVal = document.getElementById("studentFIdValEdit").value;
+            var gradeIdVal = $("#gradeFIdValue").val();
+
+
+            var gradeDto = {
+                id: gradeIdVal,
+                value: $("#gradeFValueValEdit").val(),
+                weight: $("#gradeFWeightValEdit").val(),
+                description: $("#gradeFDescValEdit").val(),
+                date: $("#gradeFDateValEdit").val(),
+                teacherId: teacherIdVal,
+                subjectId: subjectIdVal,
+                studentId: studentIdVal,
+            };
+
+            // Creating a XHR object
+            let xhr = new XMLHttpRequest();
+            let url = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal + "/updateFinalGrade";
+
+            // open a connection
+            xhr.open("POST", url, true);
+
+            // Set the request header i.e. which type of content you are sending
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("_csrf", csrf);
+            xhr.setRequestHeader('x-csrf-token', csrf);
+
+            // Create a state change callback
+            xhr.onreadystatechange = function () {
+                location.href = "/teacher/" + teacherIdVal + "/grade/subject/" + subjectIdVal;
+            };
+
+
+            // Converting JSON data to string
+            var data = JSON.stringify(gradeDto);
+
+            // Sending data with the request
+            xhr.send(data);
+        }
+    });
+</script>
+
+
+
+<!--average grade-->
+<!--Weighted arithmetic mean-->
+<script>
+    var sum = 0.0;
+    var weightSum = 0;
+    var average = 0.0;
+
+    $( ".students" ).each(function() {
+        sum = 0.0;
+        weightSum = 0;
+        average = 0.0;
+
+        var grades = "#" + $(this).attr("id") + " td.grades";
+        $(grades.toString()).each(function() {
+            var value = $(this).attr("value");
+            var weight = $(this).find("input").attr("value");
+            sum = +sum + +(value*weight);
+            weightSum = +weightSum + +weight;
+        });
+
+        average = (sum / weightSum);
+        
+        if (!isNaN(average)) {
+            var averageGrade = "#" + $(this).attr("id") + " td.averageGrade";
+            $(averageGrade.toString()).html(average.toPrecision(3).toString());
+        }
+    });
+</script>
+
+
+
+</body>
+
+</html>
